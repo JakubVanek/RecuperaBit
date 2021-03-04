@@ -56,6 +56,7 @@ commands = (
     ('bodyfile <part#> <path>', 'Save a body file representation in a file'),
     ('tikzplot <part#> [<path>]', 'Produce LaTeX code to draw a Tikz figure'),
     ('restore <part#> <file>', 'Recursively restore files from <file>'),
+    ('restoreall', 'Recursively restore all partitions'),
     ('locate <part#> <text>', 'Print all file paths that match a string'),
     ('traceback <part#> <file>', 'Print ids and paths for all ancestors of <file>'),
     ('merge <part#> <part#>', 'Merge the two partitions into the first one'),
@@ -179,6 +180,19 @@ def interpret(cmd, arguments, parts, shorthands, outdir):
                     print('The index is not valid')
                 else:
                     logic.recursive_restore(myfile, part, partition_dir)
+    elif cmd == 'restoreall':
+        if len(arguments) != 0:
+            print('Wrong number of parameters!')
+        else:
+            for i, part in shorthands:
+                part_obj = check_valid_part(i, parts, shorthands)
+                if part_obj.recoverable:
+                    print(f'=== Partition #{i} ===')
+                    if part_obj.root is not None:
+                        logic.recursive_restore(part_obj.root, part_obj, outdir)
+                    if part_obj.lost is not None:
+                        logic.recursive_restore(part_obj.lost, part_obj, outdir)
+            print("Hopefully done.")
     elif cmd == 'locate':
         if len(arguments) != 2:
             print('Wrong number of parameters!')
